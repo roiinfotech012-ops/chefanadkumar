@@ -3,7 +3,17 @@ import path from 'node:path';
 
 // Load .env if not already loaded so ALLOWED_HOSTS is always mapped from .env
 function getEnvAllowedHosts() {
-  const raw = process.env.ALLOWED_HOSTS || 'localhost,127.0.0.1,chefanandkumar.com,www.chefanandkumar.com,*.chefanandkumar.com';
+  let raw = process.env.ALLOWED_HOSTS || '';
+  if (!raw) {
+    const envPath = path.join(process.cwd(), '.env');
+    if (fs.existsSync(envPath)) {
+      const content = fs.readFileSync(envPath, 'utf8');
+      const match = content.match(/^\s*ALLOWED_HOSTS\s*=\s*(.+)$/m);
+      if (match) {
+        raw = match[1].trim().replace(/^['"]|['"]$/g, '');
+      }
+    }
+  }
   return raw
     .split(',')
     .map((h) => h.trim())
